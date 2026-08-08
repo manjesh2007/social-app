@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Nearby Friends",
+    "slug": "nearby-friends",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#6C5CE7"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.nearbyfriends"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#6C5CE7"
+      },
+      "package": "com.example.nearbyfriends",
+"softwareKeyboardLayoutMode": "resize",
+"permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Nearby Friends to use your location to show approximate distance to other users."
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
