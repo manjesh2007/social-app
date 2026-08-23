@@ -230,7 +230,12 @@ router.post(
                   sender: req.user._id,
                   recipient: req.params.userId,
 
-                  text: '',
+                  text:
+  messageType === 'image'
+    ? 'Photo'
+    : messageType === 'video'
+    ? 'Video'
+    : 'File',
 
                   messageType,
 
