@@ -5,13 +5,23 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const upload = multer({
   storage: multer.memoryStorage(),
 });
 
 const router = express.Router();
 
-// GET /api/chat/conversations - list conversations with last message + unread count
+// =====================================================
+// GET /api/chat/conversations
+// List conversations with last message + unread count
+// =====================================================
+
 router.get('/conversations', auth, async (req, res) => {
   try {
     const me = await User.findById(req.user._id).populate(
@@ -50,6 +60,9 @@ router.get('/conversations', auth, async (req, res) => {
                 text: lastMessage.text,
                 createdAt: lastMessage.createdAt,
                 sender: lastMessage.sender,
+                messageType: lastMessage.messageType,
+                mediaUrl: lastMessage.mediaUrl,
+                fileName: lastMessage.fileName,
               }
             : null,
 
@@ -72,7 +85,10 @@ router.get('/conversations', auth, async (req, res) => {
 
     res.json({ conversations });
   } catch (err) {
-    console.error(err);
+    console.error(
+      'Conversations error:',
+      err
+    );
 
     res.status(500).json({
       message: 'Server error fetching conversations',
@@ -92,11 +108,28 @@ router.post(
   upload.single('file'),
   async (req, res) => {
     try {
+      console.log(
+        'MEDIA UPLOAD REQUEST:',
+        req.user._id.toString(),
+        '->',
+        req.params.userId
+      );
+
+      // Check file
       if (!req.file) {
+        console.log('MEDIA UPLOAD ERROR: No file received');
+
         return res.status(400).json({
           message: 'File is required',
         });
       }
+
+      console.log(
+        'MEDIA FILE:',
+        req.file.originalname,
+        req.file.mimetype,
+        req.file.size
+      );
 
       // Sirf friends ko media bhejne ki permission
       if (
@@ -118,25 +151,50 @@ router.post(
       // MIME type se message type decide karo
       let messageType = 'file';
 
-      if (req.file.mimetype.startsWith('image/')) {
+      if (
+        req.file.mimetype &&
+        req.file.mimetype.startsWith('image/')
+      ) {
         messageType = 'image';
       } else if (
+        req.file.mimetype &&
         req.file.mimetype.startsWith('video/')
       ) {
         messageType = 'video';
       }
 
+      console.log(
+        'MESSAGE TYPE:',
+        messageType
+      );
+
+      // Cloudinary configuration check
+      if (
+        !process.env.CLOUDINARY_CLOUD_NAME ||
+        !process.env.CLOUDINARY_API_KEY ||
+        !process.env.CLOUDINARY_API_SECRET
+      ) {
+        console.error(
+          'CLOUDINARY ENV VARIABLES ARE MISSING'
+        );
+
+        return res.status(500).json({
+          message:
+            'Cloudinary configuration is missing on server',
+        });
+      }
+
+      // Upload to Cloudinary
       const stream =
         cloudinary.uploader.upload_stream(
           {
             folder: 'social-app/chat-media',
             resource_type: 'auto',
           },
-
           async (error, result) => {
             if (error) {
               console.error(
-                'Cloudinary media upload error:',
+                'CLOUDINARY UPLOAD ERROR:',
                 error
               );
 
@@ -144,6 +202,26 @@ router.post(
                 message: 'Media upload failed',
               });
             }
+
+            if (
+              !result ||
+              !result.secure_url
+            ) {
+              console.error(
+                'CLOUDINARY ERROR: No secure_url returned',
+                result
+              );
+
+              return res.status(500).json({
+                message:
+                  'Cloudinary did not return media URL',
+              });
+            }
+
+            console.log(
+              'CLOUDINARY UPLOAD SUCCESS:',
+              result.secure_url
+            );
 
             try {
               const message =
@@ -165,6 +243,11 @@ router.post(
                     req.file.mimetype || '',
                 });
 
+              console.log(
+                'MEDIA MESSAGE SAVED:',
+                message._id.toString()
+              );
+
               // Receiver ko realtime message
               const io = req.app.get('io');
 
@@ -173,18 +256,23 @@ router.post(
                   'message:new',
                   message
                 );
+
+                console.log(
+                  'MEDIA MESSAGE EMITTED TO:',
+                  req.params.userId
+                );
               }
 
-              res.status(201).json({
+              return res.status(201).json({
                 message,
               });
             } catch (dbError) {
               console.error(
-                'Media message DB error:',
+                'MEDIA MESSAGE DB ERROR:',
                 dbError
               );
 
-              res.status(500).json({
+              return res.status(500).json({
                 message:
                   'Media message save nahi ho paya',
               });
@@ -192,14 +280,15 @@ router.post(
           }
         );
 
+      // Send file buffer to Cloudinary
       stream.end(req.file.buffer);
     } catch (err) {
       console.error(
-        'Media upload route error:',
+        'MEDIA UPLOAD ROUTE ERROR:',
         err
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           'Server error uploading media',
       });
@@ -208,7 +297,11 @@ router.post(
 );
 
 
-// GET /api/chat/:userId - message history with a specific friend
+// =====================================================
+// GET /api/chat/:userId
+// Message history with a specific friend
+// =====================================================
+
 router.get('/:userId', auth, async (req, res) => {
   try {
     const conversationId =
@@ -239,7 +332,10 @@ router.get('/:userId', auth, async (req, res) => {
 
     res.json({ messages });
   } catch (err) {
-    console.error(err);
+    console.error(
+      'Message history error:',
+      err
+    );
 
     res.status(500).json({
       message: 'Server error fetching messages',
@@ -248,7 +344,11 @@ router.get('/:userId', auth, async (req, res) => {
 });
 
 
-// POST /api/chat/:userId - send text message
+// =====================================================
+// POST /api/chat/:userId
+// Send text message
+// =====================================================
+
 router.post('/:userId', auth, async (req, res) => {
   try {
     const { text } = req.body;
@@ -296,7 +396,10 @@ router.post('/:userId', auth, async (req, res) => {
       message,
     });
   } catch (err) {
-    console.error(err);
+    console.error(
+      'Send text message error:',
+      err
+    );
 
     res.status(500).json({
       message: 'Server error sending message',
