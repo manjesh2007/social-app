@@ -1,0 +1,186 @@
+{
+  "app_name": "Nearby Friends",
+  "personality": "4 Tactile / Playful LIGHT",
+  "personality_one_liner": "An upbeat, approachable social connection app built with rounded shapes, vibrant tonal cards, and touchable elements.",
+  "color": {
+    "surface": "#FFFDF9",
+    "onSurface": "#1F1D2B",
+    "surfaceSecondary": "#F5F3ED",
+    "onSurfaceSecondary": "#2D2A38",
+    "surfaceTertiary": "#ECE6DE",
+    "onSurfaceTertiary": "#3E3A46",
+    "surfaceInverse": "#1F1D2B",
+    "onSurfaceInverse": "#FFFDF9",
+    "brand": "#FF6B6B",
+    "brandPrimary": "#FF6B6B",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#FF8E53",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#FFE3E3",
+    "onBrandTertiary": "#D93838",
+    "success": "#22C55E",
+    "onSuccess": "#FFFFFF",
+    "warning": "#F59E0B",
+    "onWarning": "#FFFFFF",
+    "error": "#EF4444",
+    "onError": "#FFFFFF",
+    "info": "#3B82F6",
+    "onInfo": "#FFFFFF",
+    "border": "#E5E0D8",
+    "borderStrong": "#D1C8BC",
+    "divider": "#EFECE6"
+  },
+  "typography": {
+    "displayFontFamily": "PlusJakartaSans_700Bold",
+    "textFontFamily": "PlusJakartaSans_400Regular",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous vertical padding, comfortable touchable targets, rounded modular card spacing.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 8,
+    "md": 14,
+    "lg": 22,
+    "pill": 999
+  },
+  "shadow_tier": "2",
+  "navigation": "bottom_tabs",
+  "icon_set": "Ionicons",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Use frosted glass on sticky headers and bottom sheets",
+      "Apply translucent tinted overlays on hero cards"
+    ],
+    "dont's": [
+      "Avoid blur over dense list items or form inputs"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Auth & DOB Age-Gate",
+      "purpose": "Verify user age and onboard new accounts securely.",
+      "states": {
+        "loading": "Checking verification status...",
+        "empty": "Please enter your date of birth to continue.",
+        "error": "You must be at least 18 years old to join Nearby Friends."
+      },
+      "layout": "Centered clean verification card with smooth DOB picker, age validation feedback, and vibrant social sign-up CTAs."
+    },
+    {
+      "name": "Home Feed",
+      "purpose": "Display stories and social posts from friends and community members.",
+      "states": {
+        "loading": "Loading stories and feed...",
+        "empty": "No posts yet. Follow friends or explore nearby to see updates!",
+        "error": "Failed to load feed. Check your connection."
+      },
+      "layout": "Top horizontal stories rail followed by single-column modular post cards with author avatars, media preview, and interactive reactions."
+    },
+    {
+      "name": "Friends & Chat",
+      "purpose": "Manage connections and participate in real-time 1-on-1 messaging.",
+      "states": {
+        "loading": "Loading chats...",
+        "empty": "No active conversations. Connect with people nearby!",
+        "error": "Could not connect to chat service."
+      },
+      "layout": "Search header, active friends horizontal strip, and list of direct chat conversation rows with unread badges."
+    },
+    {
+      "name": "Post Creation",
+      "purpose": "Allow users to share photos, thoughts, and moments with the feed.",
+      "states": {
+        "loading": "Uploading post...",
+        "empty": "Write something or attach a photo to share.",
+        "error": "Failed to publish post. Try again."
+      },
+      "layout": "Full-screen modal with media picker, rich text input, audience selector, and sticky publish action."
+    },
+    {
+      "name": "Notifications",
+      "purpose": "Keep users updated on likes, comments, friend requests, and radar alerts.",
+      "states": {
+        "loading": "Fetching notifications...",
+        "empty": "All caught up! No new notifications.",
+        "error": "Unable to load notifications."
+      },
+      "layout": "Categorized notification items with action buttons (Accept/Decline) and interactive timestamps."
+    },
+    {
+      "name": "Nearby Radar Discovery",
+      "purpose": "Discover people and spots nearby using radar scanning and distance filters.",
+      "states": {
+        "loading": "Scanning nearby area...",
+        "empty": "No one found in this radius. Expand your radar search!",
+        "error": "Location access denied. Enable GPS in settings."
+      },
+      "layout": "Interactive radar map grid with animated pulsing scanner ring, distance slider, and bottom friend profile preview cards."
+    },
+    {
+      "name": "Live Connect (Omegle-Style)",
+      "purpose": "Random 1-on-1 video/audio matching with instant next rematching and moderation.",
+      "states": {
+        "loading": "Finding someone random...",
+        "empty": "No match found. Tap retry to search again.",
+        "error": "WebRTC connection error. Reconnecting..."
+      },
+      "layout": "Full-screen remote video stream with floating PiP local camera feed, media toggles (mic/cam), report/block overlay, and instant Next Match button."
+    },
+    {
+      "name": "Profile & Settings",
+      "purpose": "Manage user profile details, bio, photos, and app preferences.",
+      "states": {
+        "loading": "Loading profile...",
+        "empty": "Add your first photo to your profile.",
+        "error": "Failed to save profile changes."
+      },
+      "layout": "Header banner with avatar, stats counters, tabbed grid of user posts, and settings menu rows."
+    }
+  ],
+  "images": {
+    "avatar_1": {
+      "url": "https://images.unsplash.com/photo-1707396172424-f3293f788364?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxzb2NpYWwlMjBwcm9maWxlJTIwYXZhdGFyJTIwcGVvcGxlJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg4MjUyOTAxfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "User Avatar 1"
+    },
+    "avatar_2": {
+      "url": "https://images.unsplash.com/photo-1707396174323-dd31d3dd4a97?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwzfHxzb2NpYWwlMjBwcm9maWxlJTIwYXZhdGFyJTIwcGVvcGxlJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg4MjUyOTAxfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "User Avatar 2"
+    },
+    "live_stream": {
+      "url": "https://images.unsplash.com/photo-1764664281859-36f1b637b6a8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwzfHxsaXZlJTIwc3RyZWFtaW5nJTIwdmlkZW8lMjBjYWxsJTIwcGVyc29uJTIwZmFjZXxlbnwwfHx8fDE3ODgyNTI5MDF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Live Video Call Stream"
+    },
+    "radar_map": {
+      "url": "https://images.unsplash.com/photo-1612043743114-d19a560b70eb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2OTV8MHwxfHNlYXJjaHwzfHx1cmJhbiUyMGNpdHklMjBzdHJlZXQlMjByYWRhciUyMG1hcCUyMGRpc2NvdmVyeXxlbnwwfHx8fDE3ODgyNTI5MDF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Nearby Radar Map"
+    }
+  },
+  "instructions_to_main_agent": "Ensure touch targets are at least 44x44pt, use rounded modular cards with tactile feedback, implement the flagship Live Connect video matching screen with instant next match and safety moderation, include DOB age-gating verification at auth, and ensure all 5 main tabs (Home Feed, Friends, Post, Notifications, Nearby) are fully styled and functional."
+}
