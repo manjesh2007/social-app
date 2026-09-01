@@ -151,10 +151,13 @@ export default function NearbyScreen() {
 
               return (
                 <View key={u.id} style={styles.userCard} testID={`nearby-user-card-${u.id}`}>
-                  <Image
-                    source={{ uri: u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500' }}
-                    style={styles.avatar}
-                  />
+                  <View style={styles.avatarWrap}>
+                    <Image
+                      source={{ uri: u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500' }}
+                      style={styles.avatar}
+                    />
+                    {u.is_online && <View style={styles.onlineDot} testID={`online-dot-${u.id}`} />}
+                  </View>
 
                   <View style={styles.userInfo}>
                     <View style={styles.userNameRow}>
@@ -165,7 +168,10 @@ export default function NearbyScreen() {
                       </View>
                     </View>
 
-                    <Text style={styles.userCity}>{u.city || 'Nearby'} • {u.age || 22} yrs</Text>
+                    <Text style={styles.userCity}>
+                      {u.is_online ? <Text style={styles.onlineLabel}>● Online  </Text> : null}
+                      {u.city || 'Nearby'} • {u.age || 22} yrs
+                    </Text>
                     {u.bio ? <Text style={styles.userBio} numberOfLines={1}>{u.bio}</Text> : null}
 
                     {u.interests && u.interests.length > 0 && (
@@ -336,6 +342,25 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: THEME.colors.surfaceSecondary,
+  },
+  avatarWrap: {
+    position: 'relative',
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: THEME.colors.success,
+    borderWidth: 2.5,
+    borderColor: THEME.colors.cardBackground,
+  },
+  onlineLabel: {
+    color: THEME.colors.success,
+    fontWeight: '800',
+    fontSize: 11,
   },
   userInfo: {
     flex: 1,

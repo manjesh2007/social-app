@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
 import { api, getAuthToken, setAuthToken, removeAuthToken, setStoredUser, getStoredUser } from '@/src/api/client';
 import { router } from 'expo-router';
 
@@ -35,6 +36,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const heartbeatRef = useRef<any>(null);
+
+  // Presence heartbeat: keep user online while app is active
+  useEffect(() => {
+    function ping() {
+      if (token) api.heartbeat().catch(() => {});
+    }
+    if (token) {
+      ping();
+      heartbeatRef.current = setInterval(ping, 30000);
+      const sub = AppState.addEventListener('change', (s) => {
+        if (s === 'active') ping();
+      });
+      return () => {
+        if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+        sub.remove();
+      };
+    }
+    return () => {
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+    };
+  }, [token]);
 
   useEffect(() => {
     checkExistingAuth();

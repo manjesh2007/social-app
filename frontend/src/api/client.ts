@@ -70,6 +70,7 @@ export const api = {
   login: (body: any) => apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   getMe: () => apiRequest('/auth/me'),
   updateProfile: (body: any) => apiRequest('/auth/update-profile', { method: 'PUT', body: JSON.stringify(body) }),
+  heartbeat: () => apiRequest('/presence/heartbeat', { method: 'POST' }),
 
   // Feed & Posts
   getFeed: () => apiRequest('/feed'),

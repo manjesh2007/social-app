@@ -61,6 +61,20 @@ def calculate_age(dob_date: date) -> int:
     today = date.today()
     return today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
 
+PRESENCE_WINDOW_SECONDS = 90
+
+def compute_is_online(user: Dict[str, Any]) -> bool:
+    last = user.get("last_active")
+    if not last:
+        return bool(user.get("is_online", False))
+    try:
+        dt = datetime.fromisoformat(last)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - dt).total_seconds() <= PRESENCE_WINDOW_SECONDS
+    except Exception:
+        return bool(user.get("is_online", False))
+
 def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     # Haversine formula in KM
     R = 6371.0
@@ -726,6 +740,12 @@ async def login_user(payload: LoginRequest):
         "user": user
     }
 
+@api_router.post("/presence/heartbeat")
+async def presence_heartbeat(current_user: Dict[str, Any] = Depends(get_current_user)):
+    now = datetime.now(timezone.utc).isoformat()
+    await db.users.update_one({"id": current_user["id"]}, {"$set": {"is_online": True, "last_active": now}})
+    return {"status": "ok", "last_active": now}
+
 @api_router.get("/auth/me")
 async def get_my_profile(current_user: Dict[str, Any] = Depends(get_current_user)):
     user = dict(current_user)
@@ -867,10 +887,16 @@ async def get_friends_list(current_user: Dict[str, Any] = Depends(get_current_us
         friend_ids.append(fid)
 
     friends = await db.users.find({"id": {"$in": friend_ids}, "deleted_at": None}).to_list(200)
+    my_lat = current_user.get("latitude", 19.0760)
+    my_lon = current_user.get("longitude", 72.8777)
     for fr in friends:
         fr.pop("password_hash", None)
         fr.pop("_id", None)
+        fr["is_online"] = compute_is_online(fr)
+        fr["distance_km"] = calculate_distance(my_lat, my_lon, fr.get("latitude", my_lat), fr.get("longitude", my_lon))
 
+    # Online friends first, then nearest by distance
+    friends.sort(key=lambda x: (not x["is_online"], x["distance_km"]))
     return friends
 
 @api_router.get("/friends/requests")
@@ -1000,7 +1026,7 @@ async def get_user_chats(current_user: Dict[str, Any] = Depends(get_current_user
                 "partner_name": partner["name"],
                 "partner_avatar": partner.get("avatar"),
                 "partner_city": partner.get("city", "Nearby"),
-                "is_online": partner.get("is_online", False),
+                "is_online": compute_is_online(partner),
                 "last_message": c.get("last_message", ""),
                 "last_message_at": c.get("last_message_at", ""),
                 "unread_count": c.get("unread_count", {}).get(user_id, 0)
@@ -1091,10 +1117,12 @@ async def get_nearby_users(
             u.pop("password_hash", None)
             u.pop("_id", None)
             u["distance_km"] = dist
+            u["is_online"] = compute_is_online(u)
             u["friend_status"] = friendship_status_map.get(u["id"], "none")
             nearby_list.append(u)
 
-    nearby_list.sort(key=lambda x: x["distance_km"])
+    # Online users first, then nearest by distance
+    nearby_list.sort(key=lambda x: (not x["is_online"], x["distance_km"]))
     return nearby_list
 
 # ----------------- Notifications -----------------

@@ -195,13 +195,19 @@ export default function FriendsScreen() {
           contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
             <View style={styles.friendRow} testID={`friend-item-${item.id}`}>
-              <Image
-                source={{ uri: item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500' }}
-                style={styles.chatAvatar}
-              />
+              <View style={styles.avatarWrapper}>
+                <Image
+                  source={{ uri: item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500' }}
+                  style={styles.chatAvatar}
+                />
+                {item.is_online && <View style={styles.onlineBadge} testID={`friend-online-dot-${item.id}`} />}
+              </View>
               <View style={styles.chatInfo}>
                 <Text style={styles.partnerName}>{item.name}</Text>
-                <Text style={styles.chatCity}>{item.city || 'Nearby'} • {item.age || 22} yrs</Text>
+                <Text style={styles.chatCity}>
+                  {item.is_online ? <Text style={styles.onlineTextLabel}>● Online  </Text> : null}
+                  {typeof item.distance_km === 'number' ? `${item.distance_km} km • ` : ''}{item.city || 'Nearby'}
+                </Text>
               </View>
 
               <View style={styles.friendActionRow}>
@@ -414,6 +420,11 @@ const styles = StyleSheet.create({
     backgroundColor: THEME.colors.success,
     borderWidth: 2,
     borderColor: THEME.colors.surface,
+  },
+  onlineTextLabel: {
+    color: THEME.colors.success,
+    fontWeight: '800',
+    fontSize: 11,
   },
   chatInfo: {
     flex: 1,

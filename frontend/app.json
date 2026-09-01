@@ -46,6 +46,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#FFFDF9"
         }
+      ],
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "Enable camera to join Live Connect video matching",
+          "microphonePermission": "Enable microphone to talk with friends on Live Connect"
+        }
       ]
     ],
     "experiments": {
